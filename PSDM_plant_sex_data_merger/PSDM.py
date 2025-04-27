@@ -9,6 +9,7 @@ import n2_backend_pd
 button_color = "#faebd9"
 text_color = "#fff5e5"
 basf_color = '#f8991d'
+folder_path = None
 
 # main
 def main():
@@ -20,7 +21,7 @@ def main():
 class PDSM_App(tk.Tk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.title("PDSM")
+        self.title("PSDM")
         self.geometry("600x550")
 
         self.columnconfigure(0, weight=1)
@@ -160,6 +161,14 @@ class PDSM_App(tk.Tk):
             # Show a message if no file is selected
             messagebox.showwarning("No file selected", "Please select a file to remove.")
 
+
+    def select_export_folder(self):
+        global folder_path
+        folder_path = filedialog.askdirectory(title="Select export folder")
+        if folder_path:
+            self.show_selected_folder.config(text=f"Selected Folder: {folder_path}")
+
+
     def send_data_to_backend(self):
         global folder_path
         paths = []
@@ -170,22 +179,13 @@ class PDSM_App(tk.Tk):
 
         if len(paths) < 1:
             messagebox.showwarning("No files to merge", "There are no files in the list to merge.")
+            return  
         
-        elif not folder_path:
-            messagebox.showerror("Error", "Folder path field is empty.")
+        if not folder_path:
+            messagebox.showwarning("Error", "Folder path field is empty.")
+            return  
 
-        else:
-            n2_backend_pd.receive_data(paths, edit_date, folder_path)
-           
-            
-
-
-
-    def select_export_folder(self):
-        global folder_path
-        folder_path = filedialog.askdirectory(title="Select export folder")
-        if folder_path:
-            self.show_selected_folder.config(text=f"Selected Folder: {folder_path}")
+        n2_backend_pd.receive_data(paths, edit_date, folder_path)
 
 
 if __name__ == "__main__":
