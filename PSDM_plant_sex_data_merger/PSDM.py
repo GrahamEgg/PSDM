@@ -4,6 +4,7 @@ from PIL import ImageTk, Image
 import pd_back_end
 import n2_backend_pd
 
+
 # colors
 button_color = "#faebd9"
 text_color = "#fff5e5"
@@ -11,6 +12,8 @@ basf_color = '#f8991d'
 
 # main
 def main():
+    
+
     root = PDSM_App()
     root.mainloop()
 
@@ -18,7 +21,7 @@ class PDSM_App(tk.Tk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title("PDSM")
-        self.geometry("550x500")
+        self.geometry("600x550")
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)  # Allow column 1 to expand
@@ -58,57 +61,84 @@ class PDSM_App(tk.Tk):
 
         psdm = create_bordered_label(self, "Plant Sex Data Merger", row=1, column=0, columnspan=10)
 
-        self.add_file_path()
+        self.widgets_nav()
 
-    def add_file_path(self):
+    def widgets_nav(self):
+
         style = ttk.Style()
         style.configure("Custom.TFrame", background=basf_color)
 
-        # List frame voor de bestanden
+       
+
+        # frame for listbox / scrollbar
         list_frame = ttk.Frame(self, style="Custom.TFrame")
+        
         list_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", padx=5, pady=(10, 5))
 
-        # Listbox (midden in het frame)
+        # Listbox (
         self.listbox = tk.Listbox(list_frame, width=50, height=10, bg="white")
         self.listbox.grid(row=0, column=1, sticky="nsew")
 
-        # Verticale scrollbar (rechts van de Listbox)
+        # Verticale scrollbar 
         v_scroll = ttk.Scrollbar(list_frame, orient="vertical", command=self.listbox.yview)
         v_scroll.grid(row=0, column=2, sticky="ns")
 
-        # Horizontale scrollbar (onder de Listbox)
+        # Horizontale scrollbar 
         h_scroll = ttk.Scrollbar(list_frame, orient="horizontal", command=self.listbox.xview)
         h_scroll.grid(row=1, column=1, sticky="ew")
 
         # Koppel scrollbars aan Listbox
         self.listbox.config(yscrollcommand=v_scroll.set, xscrollcommand=h_scroll.set)
 
-        list_frame_button = ttk.Frame(self, style="Custom.TFrame")
-        list_frame.grid(row=3, column=0,  sticky="nsew", pady=(10, 5))
-
-        # upload CSV knop
-        upload_xls_file_button = tk.Button(self, text=" + CSV file ", background=button_color,
-                                           command=self.select_file)
-        upload_xls_file_button.grid(row=4, column=0, sticky="w", padx=10, pady=5)
-
-        # Verwijder-knop (links onderaan)
-        remove_file_button = tk.Button(self, text="Delete", background=button_color, width=8, height=1,
-                                       command=self.remove_file)
-        remove_file_button.grid(row=4, column=0, sticky="ns", padx=10, pady=5)
-
-        # Maak de kolommen en rijen dynamisch
+        # column and row config for listbox
         list_frame.columnconfigure(1, weight=1)
         list_frame.rowconfigure(0, weight=1)
 
-        # option
+        button_frame = ttk.Frame(self, style="Custom.TFrame")
+        button_frame.grid(row=4, column=0, columnspan=2, sticky="w", padx=10, pady=5)
+
+        
+        # upload CSV button
+        upload_xls_file_button = tk.Button(button_frame, text=" + CSV file ", background=button_color,
+                                           command=self.select_file)
+        upload_xls_file_button.grid(row=4, column=0, sticky="w", padx=10, pady=5)
+
+        # Remove button from path list
+        remove_file_button = tk.Button(button_frame, text="Delete", background=button_color, width=8, height=1,
+                                       command=self.remove_file)
+        remove_file_button.grid(row=4, column=1, sticky="ns", padx=10, pady=5)
+
+        
+        # check box 
         self.date_check = tk.BooleanVar()
-
         date_check_box = tk.Checkbutton(self, text='Add date if empty',variable=self.date_check, onvalue=True, offvalue=False, background=basf_color)
-        date_check_box.grid(row=5, column=0, sticky="w", padx=10, pady=15)
+        date_check_box.grid(row=5, column=0, sticky="w", padx=10, pady=5)
 
-        upload_xls_file_button = tk.Button(self, text="Merge data", background=button_color,
+
+
+        
+        # select button to select a folder to export
+        frame_select_folder_button = ttk.Frame(self, style="Custom.TFrame")
+        frame_select_folder_button.grid(row=6, column=0,  sticky="nsew", pady=(10, 5))
+        frame_select_folder_button.grid_propagate(True)
+        frame_select_folder_button.config(height=40 )
+       
+        select_folder_button = tk.Button(frame_select_folder_button, text="Select export folder", background=button_color,
+                                command=self.select_export_folder)
+        select_folder_button.grid(row=1, column=0, sticky="w", padx=10, pady=(5, 0))
+
+        self.show_selected_folder = tk.Label(frame_select_folder_button, text="Selected Folder:", wraplength= 400, background=basf_color)
+        self.show_selected_folder.grid(row=1, column=1, sticky="w", padx=10, pady=(5, 0))
+        self.grid_rowconfigure(6, weight=0, minsize=30)
+
+        # the merger button to send the data ot the backend
+
+        upload_button_frame = ttk.Frame(self, style="Custom.TFrame")
+        upload_button_frame.grid(row=7, column=0, columnspan=3, sticky="e", padx=10, pady=5)
+
+        upload_xls_file_button = tk.Button(upload_button_frame, text="Merge data", background=button_color,
                                            command=self.send_data_to_backend)
-        upload_xls_file_button.grid(row=6, column=1, sticky="w", padx=10, pady=5)
+        upload_xls_file_button.grid(row=0, column=3, sticky="e", padx=10, pady=5)
 
 
     def select_file(self):
@@ -131,20 +161,31 @@ class PDSM_App(tk.Tk):
             messagebox.showwarning("No file selected", "Please select a file to remove.")
 
     def send_data_to_backend(self):
+        global folder_path
         paths = []
         all_paths = self.listbox.get(0, tk.END)
         for p in all_paths:
             paths.append(p)
         edit_date = self.date_check.get()
 
-        if len(paths) >= 1:
-            n2_backend_pd.receive_data(paths, edit_date)
+        if len(paths) < 1:
+            messagebox.showwarning("No files to merge", "There are no files in the list to merge.")
+        
+        elif not folder_path:
+            messagebox.showerror("Error", "Folder path field is empty.")
 
         else:
-            messagebox.showwarning("No files to merge", "There are no files in the list to merge.")
-            return
+            n2_backend_pd.receive_data(paths, edit_date, folder_path)
+           
+            
 
 
+
+    def select_export_folder(self):
+        global folder_path
+        folder_path = filedialog.askdirectory(title="Select export folder")
+        if folder_path:
+            self.show_selected_folder.config(text=f"Selected Folder: {folder_path[50:]}")
 
 
 if __name__ == "__main__":
