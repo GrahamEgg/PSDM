@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from PIL import ImageTk, Image
-import pd_back_end
+#import pd_back_end
 import n2_backend_pd
 
 
@@ -185,7 +185,7 @@ class PDSM_App(tk.Tk):
         global folder_path
         folder_path = filedialog.askdirectory(title="Select export folder")
         if folder_path:
-            self.show_selected_folder.config(text=f"Selected Folder: {folder_path[50:]}")
+            self.show_selected_folder.config(text=f"Selected Folder: {folder_path}")
 
 
 if __name__ == "__main__":
